@@ -127,19 +127,3 @@ def parse_entities(submission_list):
                 lowercase_norp = ent.text.lower()
                 if lowercase_norp in nationality_dict and nationality_dict[lowercase_norp].title() not in [x.name for x in s.locations]:
                     s.locations.append(Location(name=nationality_dict[lowercase_norp].title()))
-            
-            
-    # for s in submission_list:
-    #     for sub_str in s.title.split(" "):
-    #         if country_set.h
-    # for s in submission_list:
-    #     doc = nlp(s.title)
-    #     for ent in doc.ents:
-    #         if (ent.label_ == 'GPE'):
-    #             s.locations.append(Location(name=ent.text))
-    #         if (ent.label_ == 'NORP'):
-    #             temp = ent.text.lower()
-    #             if temp in nationality_dict:
-    #                 if nationality_dict[temp] not in s.locations:
-    #                     s.locations.append(Location(name=nationality_dict[temp]))
-    return

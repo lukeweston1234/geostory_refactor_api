@@ -5,8 +5,12 @@ from dataclasses import dataclass
 from datetime import datetime
 from time import sleep
 from geopy.geocoders import Nominatim
+from dotenv import load_dotenv
+
+
 
 def main():
+    load_dotenv()
     get_posts()
 
 @dataclass 
@@ -31,13 +35,13 @@ def get_locations(posts: list[Post]):
 
 def get_posts():
     instance = praw.Reddit(
-        username="praw-api-account",
-        password="=)7sq+gCxU.=p2N",
-        client_secret="hiAz-2dmaKkHtOw3NOsm5SlFv1Cb-w",
-        client_id="bSL7WFed_benr2jpRsG1ug",
-        user_agent="praw-service"
+        username=os.getenv('username'),
+        password=os.getenv('password'),
+        client_secret=os.getenv('client_secret'),
+        client_id=os.getenv('client_id'),
+        user_agent=os.getenv('user_agent')
     )
-    posts = [Post(x.title, x.url, x.created_utc, []) for x in instance.subreddit("worldnews").hot(limit=5)]
+    posts = [Post(x.title, x.url, x.created_utc, []) for x in instance.subreddit("worldnews").hot(limit=5) if not x.stickied]
     process_nlp.parse_entities(posts)
     get_locations(posts)
 
