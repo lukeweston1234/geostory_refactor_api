@@ -5,6 +5,7 @@ from pycountry import countries
 from reddit_api import RedditPosts
 
 country_set = set([country.name for country in countries])
+country_set.add("Russia")
 
 nationality_dict = {
     'american' : 'United States of America',
@@ -114,9 +115,9 @@ nationality_dict = {
 def parse_entities(submission_list: list[RedditPosts]):
     for s in submission_list:
         for sub_str in s.title.split(" "):
-            lower_case_sub_str = sub_str.title()
-            if lower_case_sub_str in country_set and lower_case_sub_str not in s.locations:
-                s.locations.append(lower_case_sub_str)
+            title_case_sub_str = sub_str.strip().title()
+            if title_case_sub_str in country_set and title_case_sub_str not in s.locations:
+                s.locations.append(title_case_sub_str.title())
         doc = nlp(s.title)
         for ent in doc.ents:
             lower_case_ent_text = ent.text.title()

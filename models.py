@@ -4,8 +4,9 @@ from dataclasses import dataclass
 class Location:
     id: str
     location_name: str
-    coordinates: tuple[float, float]
-
+    x_coordinate: float
+    y_coordinate: float
+    
 @dataclass
 class Story:
     id: str
