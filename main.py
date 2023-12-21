@@ -1,54 +1,21 @@
 import os
-import praw
 import process_nlp
-from dataclasses import dataclass
+from models import Location, Story, StoryLocation
 from datetime import datetime
-from time import sleep
-from geopy.geocoders import Nominatim
+from reddit_api import get_posts
 from dotenv import load_dotenv
-
-
+from build_stories import build_stories
+from process_nlp import parse_entities
+from supabase import create_client, Client
 
 def main():
     load_dotenv()
-    get_posts()
-
-@dataclass 
-class Location:
-    name: str
-    coordinates: tuple[float, float] = (0,0)
-
-@dataclass
-class Post:
-    title: str
-    url: str
-    date: str
-    locations: list[Location]
-
-def get_locations(posts: list[Post]):
-    geolocator = Nominatim(user_agent="geostory")
-    for p in posts:
-        for l in p.locations:
-            location = geolocator.geocode(l.name)
-            l.coordinates = (location.latitude, location.longitude)
-        sleep(1.5) # Rate limit for GeoCoding API
-
-def get_posts():
-    instance = praw.Reddit(
-        username=os.getenv('username'),
-        password=os.getenv('password'),
-        client_secret=os.getenv('client_secret'),
-        client_id=os.getenv('client_id'),
-        user_agent=os.getenv('user_agent')
-    )
-    posts = [Post(x.title, x.url, x.created_utc, []) for x in instance.subreddit("worldnews").hot(limit=5) if not x.stickied]
-    process_nlp.parse_entities(posts)
-    get_locations(posts)
-
-    for post in posts:
-        print(post.title)
-        for l in post.locations:
-            print(l.name, l.coordinates)
+    url: str = os.environ.get("SUPABASE_URL")
+    key: str = os.environ.get("SUPABASE_KEY")
+    supabase_client: Client = create_client(url, key)
+    posts = get_posts()
+    parse_entities(posts)
+    build_stories(posts, supabase_client)
 
 if __name__ == "__main__":
     main()

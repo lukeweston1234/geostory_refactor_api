@@ -1,7 +1,8 @@
 import spacy
 nlp = spacy.load('en_core_web_md')
-from main import Location
+from models import RedditPosts
 from pycountry import countries
+from reddit_api import RedditPosts
 
 country_set = set([country.name for country in countries])
 
@@ -110,20 +111,20 @@ nationality_dict = {
 
 
 
-def parse_entities(submission_list):
+def parse_entities(submission_list: list[RedditPosts]):
     for s in submission_list:
         for sub_str in s.title.split(" "):
             lower_case_sub_str = sub_str.title()
-            if lower_case_sub_str in country_set and lower_case_sub_str not in [x.name for x in s.locations]:
-                s.locations.append(Location(name=lower_case_sub_str))
+            if lower_case_sub_str in country_set and lower_case_sub_str not in s.locations:
+                s.locations.append(lower_case_sub_str)
         doc = nlp(s.title)
         for ent in doc.ents:
             lower_case_ent_text = ent.text.title()
-            if lower_case_ent_text in [x.name for x in s.locations]:
+            if lower_case_ent_text in s.locations:
                 continue
             if (ent.label_ == 'GPE'):
-                s.locations.append(Location(name=lower_case_ent_text))
+                s.locations.append(lower_case_ent_text)
             if (ent.label_ == 'NORP'):
                 lowercase_norp = ent.text.lower()
-                if lowercase_norp in nationality_dict and nationality_dict[lowercase_norp].title() not in [x.name for x in s.locations]:
-                    s.locations.append(Location(name=nationality_dict[lowercase_norp].title()))
+                if lowercase_norp in nationality_dict and nationality_dict[lowercase_norp].title() not in s.locations:
+                    s.locations.append(nationality_dict[lowercase_norp].title())
